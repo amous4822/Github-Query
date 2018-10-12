@@ -16,6 +16,8 @@
 package com.example.android.datafrominternet;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     TextView mSearchResultsTextView;
     ProgressBar mProgressBar;
     TextView mErrorMessage;
-    Map<String,String> parsedData = new HashMap<>();
+    ImageView mProfilePic;
 
 
     @Override
@@ -58,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results_json);
         mProgressBar = (ProgressBar) findViewById(R.id.progress_circular);
         mErrorMessage = (TextView) findViewById(R.id.error_message);
+        mProfilePic = (ImageView) findViewById(R.id.profile_pic);
 
         showResult();
     }
@@ -152,18 +156,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String displayParsedData(String raw){
+
+
+
         String data;
 
         try {
-            //parsedData = JsonParserUtils.JsonParser(raw);
-            data = JsonParserUtils.JsonParser(raw);
+
+            JsonParserUtils.JsonParser(raw);
+            data = JsonParserUtils.ReturnName();
             return data;
+
         }catch (Exception e){
             e.printStackTrace();
-            return "shit";
+            return null;
         }
-    }
 
+
+
+    }
+    /*
+    public void displayImage() throws Exception{
+
+        URL url = new URL(JsonParserUtils.ReturnImageUrl());
+        Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+        mProfilePic.setImageBitmap(bmp);
+
+    }*/
 
 }
 
