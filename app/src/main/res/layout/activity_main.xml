@@ -30,8 +30,8 @@
         android:layout_height="wrap_content"
         android:hint="@string/search_text"
         android:inputType="text"
-        android:textSize="22sp" />
-
+        android:textSize="22sp"
+        android:imeOptions="actionDone"/>
 
     <TextView
         android:id="@+id/tv_url_display"
@@ -64,7 +64,8 @@
                 android:layout_height="wrap_content"
                 android:visibility="invisible"
                 android:hint="@string/search_results"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                />
 
         </ScrollView>
 
