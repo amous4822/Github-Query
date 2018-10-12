@@ -20,7 +20,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.datafrominternet.utilities.NetworkUtils;
@@ -34,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
     EditText mSearchBoxEditText;
     TextView mUrlDisplayTextView;
     TextView mSearchResultsTextView;
-
+    ProgressBar mProgressBar;
+    TextView mErrorMessage;
 
 
     @Override
@@ -44,12 +47,31 @@ public class MainActivity extends AppCompatActivity {
 
 
         mSearchBoxEditText = (EditText) findViewById(R.id.et_search_box);
-        mUrlDisplayTextView =(TextView) findViewById(R.id.tv_url_display);
+        mUrlDisplayTextView = (TextView) findViewById(R.id.tv_url_display);
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results_json);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_circular);
+        mErrorMessage = (TextView) findViewById(R.id.error_message);
+
+        showResult();
     }
 
+    public void showErrorMessage() {
+
+        mErrorMessage.setVisibility(View.VISIBLE);
+        mSearchResultsTextView.setVisibility(View.INVISIBLE);
+
+    }
+
+    public void showResult() {
+
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mSearchResultsTextView.setVisibility(View.VISIBLE);
+
+    }
+
+
     //function to call the buildURL in Network utils
-    public void makeGithubSearch(){
+    public void makeGithubSearch() {
 
         String searchParam = mSearchBoxEditText.getText().toString();
         URL searchUrl = NetworkUtils.buildUrl(searchParam);
@@ -61,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu,menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
@@ -69,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int idOfSelectedItem = item.getItemId();
-        if(idOfSelectedItem == R.id.search_menu){
+        if (idOfSelectedItem == R.id.search_menu) {
             //builds the query using parameter provided and displays the URL
             makeGithubSearch();
             return true;
@@ -77,10 +99,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class ConnectToInternet extends AsyncTask<URL , Void ,String> {
+    public class ConnectToInternet extends AsyncTask<URL, Void, String> {
 
         @Override
         protected void onPreExecute() {
+            mProgressBar.setVisibility(View.VISIBLE);
             super.onPreExecute();
         }
 
@@ -92,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 returnedResults = NetworkUtils.getResponseFromHttpUrl(url);
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
@@ -101,8 +124,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String returnedResults) {
+
             super.onPostExecute(returnedResults);
-            mSearchResultsTextView.setText(returnedResults);
+            mProgressBar.setVisibility(View.INVISIBLE);
+
+            if (returnedResults != null && !returnedResults.equals("")) {
+                mSearchResultsTextView.setText(returnedResults);
+                showResult();
+            } else {
+                showErrorMessage();
+            }
 
         }
     }
