@@ -18,4 +18,5 @@
     <string name="search_text">search here</string>
     <string name="search_url">search URL</string>
     <string name="search_results">search for results</string>
+    <string name="search_menu">Search</string>
 </resources>
