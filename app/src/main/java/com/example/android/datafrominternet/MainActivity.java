@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.example.android.datafrominternet.utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     TextView mSearchResultsTextView;
     ProgressBar mProgressBar;
     TextView mErrorMessage;
-
+    Map<String,String> parsedData = new HashMap<>();
 
 
     @Override
@@ -135,10 +137,11 @@ public class MainActivity extends AppCompatActivity {
 
             super.onPostExecute(returnedResults);
             mProgressBar.setVisibility(View.INVISIBLE);
+            String parsedData = displayParsedData(returnedResults);
 
-            if (returnedResults != null && !returnedResults.equals("")) {
+            if (parsedData != null && !parsedData.equals("")) {
 
-                mSearchResultsTextView.setText(returnedResults);
+                mSearchResultsTextView.setText(parsedData);
                 showResult();
 
             } else {
@@ -147,6 +150,20 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+    public String displayParsedData(String raw){
+        String data;
+
+        try {
+            //parsedData = JsonParserUtils.JsonParser(raw);
+            data = JsonParserUtils.JsonParser(raw);
+            return data;
+        }catch (Exception e){
+            e.printStackTrace();
+            return "shit";
+        }
+    }
+
 
 }
 
