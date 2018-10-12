@@ -27,10 +27,12 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.android.datafrominternet.utilities.JsonParserUtils;
 import com.example.android.datafrominternet.utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     TextView mSearchResultsTextView;
     ProgressBar mProgressBar;
     TextView mErrorMessage;
+
 
 
     @Override
@@ -134,15 +137,16 @@ public class MainActivity extends AppCompatActivity {
             mProgressBar.setVisibility(View.INVISIBLE);
 
             if (returnedResults != null && !returnedResults.equals("")) {
+
                 mSearchResultsTextView.setText(returnedResults);
                 showResult();
+
             } else {
                 showErrorMessage();
             }
 
         }
     }
-
 
 }
 
