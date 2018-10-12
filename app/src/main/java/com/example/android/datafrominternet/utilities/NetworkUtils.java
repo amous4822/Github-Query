@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.example.android.datafrominternet.utilities;
+
+import android.net.Uri;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -30,6 +34,23 @@ public class NetworkUtils {
     final static String PARAM_QUERY = "q";
     final static String PARAM_SORT = "sort";
     final static String sortBy = "stars";
+
+    public static URL buildUrl (String searchQuery){
+
+        Uri buildUrl = Uri.parse(GITHUB_BASE_URL).buildUpon()
+                .appendQueryParameter(PARAM_QUERY,searchQuery)
+                .appendQueryParameter(PARAM_SORT , sortBy)
+                .build();
+
+        URL searchUrl = null;
+
+        try {
+            searchUrl = new URL(buildUrl.toString());
+        }catch (MalformedURLException e){
+            e.printStackTrace();
+        }
+        return searchUrl;
+    }
 
 
     //Builds the URL used to query Github.

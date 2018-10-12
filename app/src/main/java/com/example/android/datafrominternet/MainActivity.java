@@ -23,6 +23,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.datafrominternet.utilities.NetworkUtils;
+
+import java.net.URL;
 import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,6 +47,15 @@ public class MainActivity extends AppCompatActivity {
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results_json);
     }
 
+    //function to call the buildURL in Network utils
+    public void makeGithubSearch(){
+
+        String searchParam = mSearchBoxEditText.getText().toString();
+        URL searchUrl = NetworkUtils.buildUrl(searchParam);
+        mUrlDisplayTextView.setText(searchUrl.toString());
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu,menu);
@@ -54,9 +66,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int idOfSelectedItem = item.getItemId();
-
         if(idOfSelectedItem == R.id.search_menu){
-            Toast.makeText(this, "Search button pressed", Toast.LENGTH_SHORT).show();
+            //builds the query using parameter provided and displays the URL
+            makeGithubSearch();
             return true;
         }
         return super.onOptionsItemSelected(item);
