@@ -15,18 +15,18 @@
  */
 package com.example.android.datafrominternet;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.datafrominternet.utilities.NetworkUtils;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     EditText mSearchBoxEditText;
     TextView mUrlDisplayTextView;
     TextView mSearchResultsTextView;
+
 
 
     @Override
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
         URL searchUrl = NetworkUtils.buildUrl(searchParam);
         mUrlDisplayTextView.setText(searchUrl.toString());
 
+        new ConnectToInternet().execute(searchUrl);
+
     }
 
     @Override
@@ -73,4 +76,38 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public class ConnectToInternet extends AsyncTask<URL , Void ,String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(URL... urls) {
+
+            URL url = urls[0];
+            String returnedResults = null;
+
+            try {
+                returnedResults = NetworkUtils.getResponseFromHttpUrl(url);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+            return returnedResults;
+        }
+
+        @Override
+        protected void onPostExecute(String returnedResults) {
+            super.onPostExecute(returnedResults);
+            mSearchResultsTextView.setText(returnedResults);
+
+        }
+    }
+
+
 }
+
+
