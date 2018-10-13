@@ -49,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
     TextView mErrorMessage;
     ImageView mProfilePic;
 
+    private String data;
+    private String imageUrl;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,11 +144,22 @@ public class MainActivity extends AppCompatActivity {
 
             super.onPostExecute(returnedResults);
             mProgressBar.setVisibility(View.INVISIBLE);
-            String parsedData = displayParsedData(returnedResults);
 
-            if (parsedData != null && !parsedData.equals("")) {
+            try {
 
-                mSearchResultsTextView.setText(parsedData);
+                JsonParserUtils.JsonParser(returnedResults);
+                data = JsonParserUtils.ReturnName();
+                imageUrl = JsonParserUtils.ReturnImageUrl();
+
+            }catch (Exception e){
+                e.printStackTrace();
+                data=null;
+            }
+
+
+            if (data != null && !data.equals("")) {
+
+                mSearchResultsTextView.setText(data);
                 showResult();
 
             } else {
@@ -155,34 +169,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public String displayParsedData(String raw){
 
-
-
-        String data;
-
-        try {
-
-            JsonParserUtils.JsonParser(raw);
-            data = JsonParserUtils.ReturnName();
-            return data;
-
-        }catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
-
-
-
-    }
-    /*
-    public void displayImage() throws Exception{
-
-        URL url = new URL(JsonParserUtils.ReturnImageUrl());
-        Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-        mProfilePic.setImageBitmap(bmp);
-
-    }*/
 
 }
 
