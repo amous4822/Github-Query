@@ -91,10 +91,6 @@ public class MainActivity extends AppCompatActivity {
     public void makeGithubSearch() {
 
         String searchParam = mSearchBoxEditText.getText().toString();
-
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-
         URL searchUrl = NetworkUtils.buildUrl(searchParam);
         mUrlDisplayTextView.setText(searchUrl.toString());
 
@@ -115,6 +111,10 @@ public class MainActivity extends AppCompatActivity {
         if (idOfSelectedItem == R.id.search_menu) {
             //builds the query using parameter provided and displays the URL
             makeGithubSearch();
+
+            InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -155,26 +155,25 @@ public class MainActivity extends AppCompatActivity {
                 data = JsonParserUtils.ReturnName();
                 imageUrl = JsonParserUtils.ReturnImageUrl();
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-                data=null;
+                data = null;
             }
 
             if (data != null && !data.equals("")) {
 
                 mSearchResultsTextView.setText(data);
                 new ProfilePicture().execute(imageUrl);
-
                 showResult();
-
             } else {
                 showErrorMessage();
             }
 
+
         }
     }
 
-    public class ProfilePicture extends AsyncTask<String , Void, Bitmap> {
+    public class ProfilePicture extends AsyncTask<String, Void, Bitmap> {
 
         private Bitmap bmp;
 
@@ -188,8 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 InputStream in = new java.net.URL(url).openStream();
                 bmp = BitmapFactory.decodeStream(in);
 
-            }catch (Exception e){
-                Log.d("ImageErrorZ","null here ");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return bmp;
@@ -198,15 +196,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            if (bitmap != null)
-                mProfilePic.setImageBitmap(bitmap);
-
-            else
-                Log.d("ImageErrorZ","check here ");
-
+            mProfilePic.setImageBitmap(bitmap);
         }
     }
-
 
 
 }
