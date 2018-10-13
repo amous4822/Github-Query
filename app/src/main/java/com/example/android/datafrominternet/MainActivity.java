@@ -35,6 +35,7 @@ import com.example.android.datafrominternet.utilities.JsonParserUtils;
 import com.example.android.datafrominternet.utilities.NetworkUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         mErrorMessage.setVisibility(View.VISIBLE);
         mSearchResultsTextView.setVisibility(View.INVISIBLE);
+        mProfilePic.setVisibility(View.INVISIBLE);
 
     }
 
@@ -80,9 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         mErrorMessage.setVisibility(View.INVISIBLE);
         mSearchResultsTextView.setVisibility(View.VISIBLE);
-
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        mProfilePic.setVisibility(View.VISIBLE);
 
     }
 
@@ -91,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
     public void makeGithubSearch() {
 
         String searchParam = mSearchBoxEditText.getText().toString();
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
         URL searchUrl = NetworkUtils.buildUrl(searchParam);
         mUrlDisplayTextView.setText(searchUrl.toString());
 
@@ -156,15 +160,49 @@ public class MainActivity extends AppCompatActivity {
                 data=null;
             }
 
-
             if (data != null && !data.equals("")) {
 
                 mSearchResultsTextView.setText(data);
+                new ProfilePicture().execute(imageUrl);
+
                 showResult();
 
             } else {
                 showErrorMessage();
             }
+
+        }
+    }
+
+    public class ProfilePicture extends AsyncTask<String , Void, Bitmap> {
+
+        private Bitmap bmp;
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            String url = strings[0];
+
+            try {
+
+
+                InputStream in = new java.net.URL(url).openStream();
+                bmp = BitmapFactory.decodeStream(in);
+
+            }catch (Exception e){
+                Log.d("ImageErrorZ","null here ");
+                e.printStackTrace();
+            }
+            return bmp;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            if (bitmap != null)
+                mProfilePic.setImageBitmap(bitmap);
+
+            else
+                Log.d("ImageErrorZ","check here ");
 
         }
     }
