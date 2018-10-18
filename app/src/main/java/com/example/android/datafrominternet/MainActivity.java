@@ -15,12 +15,18 @@
  */
 package com.example.android.datafrominternet;
 
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,13 +40,16 @@ import android.widget.TextView;
 import com.example.android.datafrominternet.utilities.JsonParserUtils;
 import com.example.android.datafrominternet.utilities.NetworkUtils;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<String> {
 
 
     EditText mSearchBoxEditText;
@@ -52,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
 
     private String data;
     private String imageUrl;
+    private String GITHUB_URL ="query";
+
+    private static final int GITHUB_QUERY_LOADER = 896;
+
+
 
 
     @Override
@@ -68,22 +82,19 @@ public class MainActivity extends AppCompatActivity {
         mProfilePic = (ImageView) findViewById(R.id.profile_pic);
 
         showResult();
+        getSupportLoaderManager().initLoader(GITHUB_QUERY_LOADER,null,this);
     }
 
     public void showErrorMessage() {
-
         mErrorMessage.setVisibility(View.VISIBLE);
         mSearchResultsTextView.setVisibility(View.INVISIBLE);
         mProfilePic.setVisibility(View.INVISIBLE);
-
     }
 
     public void showResult() {
-
         mErrorMessage.setVisibility(View.INVISIBLE);
         mSearchResultsTextView.setVisibility(View.VISIBLE);
         mProfilePic.setVisibility(View.VISIBLE);
-
     }
 
 
@@ -91,11 +102,25 @@ public class MainActivity extends AppCompatActivity {
     public void makeGithubSearch() {
 
         String searchParam = mSearchBoxEditText.getText().toString();
+
+        if (TextUtils.isEmpty(searchParam)){
+            mUrlDisplayTextView.setText("No query entered");
+        }
+
         URL searchUrl = NetworkUtils.buildUrl(searchParam);
         mUrlDisplayTextView.setText(searchUrl.toString());
 
-        new ConnectToInternet().execute(searchUrl);
+        Bundle queryBundle =new Bundle();
+        queryBundle.putString(GITHUB_URL,searchUrl.toString());
 
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> loader = loaderManager.getLoader(GITHUB_QUERY_LOADER);
+
+        if (loader == null){
+            loaderManager.initLoader(GITHUB_QUERY_LOADER,queryBundle,this);
+        }else {
+            loaderManager.restartLoader(GITHUB_QUERY_LOADER,queryBundle,this);
+        }
     }
 
     @Override
@@ -120,57 +145,72 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class ConnectToInternet extends AsyncTask<URL, Void, String> {
+    @SuppressLint("StaticFieldLeak")
+    @Override
+    public Loader<String> onCreateLoader(int i, final Bundle bundle) {
 
-        @Override
-        protected void onPreExecute() {
-            mProgressBar.setVisibility(View.VISIBLE);
-            super.onPreExecute();
-        }
+        return new AsyncTaskLoader<String>(this) {
 
-        @Override
-        protected String doInBackground(URL... urls) {
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if (bundle == null)
+                    return;
 
-            URL url = urls[0];
-            String returnedResults = null;
+                mProgressBar.setVisibility(View.VISIBLE);
 
-            try {
-                returnedResults = NetworkUtils.getResponseFromHttpUrl(url);
-            } catch (IOException e) {
-                e.printStackTrace();
+                forceLoad();
             }
 
-            return returnedResults;
+            @Override
+            public String loadInBackground() {
+
+                String urlGithub = bundle.getString(GITHUB_URL);
+                if (urlGithub == null || TextUtils.isEmpty(urlGithub)){
+                    return null;
+                }
+
+                try {
+                    URL query = new URL(urlGithub);
+                    return NetworkUtils.getResponseFromHttpUrl(query);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<String> loader, String dataRecieved) {
+
+        mProgressBar.setVisibility(View.INVISIBLE);
+
+        try {
+
+            JsonParserUtils.JsonParser(dataRecieved);
+            data = JsonParserUtils.ReturnName();
+            imageUrl = JsonParserUtils.ReturnImageUrl();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            data = null;
         }
 
-        @Override
-        protected void onPostExecute(String returnedResults) {
+        if (data != null && !data.equals("")) {
 
-            super.onPostExecute(returnedResults);
-            mProgressBar.setVisibility(View.INVISIBLE);
+            mSearchResultsTextView.setText(data);
+            //new ProfilePicture().execute(imageUrl);
+            showResult();
 
-            try {
-
-                JsonParserUtils.JsonParser(returnedResults);
-                data = JsonParserUtils.ReturnName();
-                imageUrl = JsonParserUtils.ReturnImageUrl();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                data = null;
-            }
-
-            if (data != null && !data.equals("")) {
-
-                mSearchResultsTextView.setText(data);
-                new ProfilePicture().execute(imageUrl);
-                showResult();
-            } else {
-                showErrorMessage();
-            }
-
-
+        } else {
+            showErrorMessage();
         }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String> loader) {
+
     }
 
     public class ProfilePicture extends AsyncTask<String, Void, Bitmap> {
