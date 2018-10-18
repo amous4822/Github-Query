@@ -158,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements
                     return;
 
                 mProgressBar.setVisibility(View.VISIBLE);
-
                 forceLoad();
             }
 
@@ -172,8 +171,14 @@ public class MainActivity extends AppCompatActivity implements
 
                 try {
                     URL query = new URL(urlGithub);
-                    return NetworkUtils.getResponseFromHttpUrl(query);
-                } catch (IOException e) {
+                    String result = NetworkUtils.getResponseFromHttpUrl(query);
+
+                    JsonParserUtils.JsonParser(result);
+                    data = JsonParserUtils.ReturnName();
+
+                    return data;
+
+                } catch (Exception e) {
                     e.printStackTrace();
                     return null;
                 }
@@ -188,18 +193,16 @@ public class MainActivity extends AppCompatActivity implements
 
         try {
 
-            JsonParserUtils.JsonParser(dataRecieved);
-            data = JsonParserUtils.ReturnName();
             imageUrl = JsonParserUtils.ReturnImageUrl();
 
         } catch (Exception e) {
             e.printStackTrace();
-            data = null;
+
         }
 
-        if (data != null && !data.equals("")) {
+        if (dataRecieved != null && !dataRecieved.equals("")) {
 
-            mSearchResultsTextView.setText(data);
+            mSearchResultsTextView.setText(dataRecieved);
             //new ProfilePicture().execute(imageUrl);
             showResult();
 
